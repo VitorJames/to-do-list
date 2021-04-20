@@ -3,17 +3,17 @@
     <v-row>
       <v-col cols="12">
         <v-row>
-          <v-col cols="12" sm="2">
-            <v-sheet rounded="lg" color="grey lighten-1" min-height="90.5vh">
-              
-            </v-sheet>
-          </v-col>
-          <!-- Loop de sessões -->
+          <!-- Relatório de tarefas -->
+          <Analytics :sessions="sessions" :tasks="tasks"/>
+          <!-- Fim do relatório de tarefas -->
+
+          <!-- Sessões -->
           <template v-for="(session,i) in sessions">
-            <Session :session="session" :key="i"/>
+            <Session :session="session" @newTask="session.tasks.push($event);manageTasks();" :key="i"/>
           </template>
-          <!-- Fim do Loop de sessões -->
-          <!-- Nova sessão -->
+          <!-- Fim das Sessões -->
+
+          <!-- Botão de nova sessão -->
           <v-col cols="12" sm="2" v-if="sessions.length <= 4">
             <v-sheet rounded="lg" min-height="6vh" class="d-flex align-center transparent" v-if="!newSession">
               <v-col cols="12">
@@ -43,7 +43,7 @@
               </v-col>
             </v-sheet>
           </v-col>
-          <!-- Fim do Nova sessão -->
+          <!-- Fim do Botão de nova sessão -->
         </v-row>
       </v-col>
     </v-row>
@@ -51,13 +51,14 @@
 </template>
 
 <script>
+import Analytics from './Analytics';
 import Session from './Session';
 
 export default {
   components: {
+    Analytics,
     Session,
   },
-
   data: () => ({
     newSession: false,
     message: 'Nova sessão',
@@ -67,27 +68,32 @@ export default {
       {
         id: 1,
         name: 'A fazer',
-        cards: {},
+        tasks: [],
       },
       {
         id: 2,
         name: 'Fazendo',
-        cards: {},
+        tasks: [],
       },
       {
         id: 3,
         name: 'Feito',
-        cards: {},
+        tasks: [],
       },
     ],
+    tasks: 0
   }),
-
   computed: {
     icon () {
       return this.icons[this.iconIndex]
     },
   },
-
+  watch:{
+    sessions(data){
+      this.manageTasks();
+      return data;
+    }
+  },
   methods: {
     toggleMarker () {
       this.marker = !this.marker
@@ -99,7 +105,7 @@ export default {
         this.sessions.push({
           id: this.sessions.length+1,
           name: this.message,
-          cards: {}
+          tasks: []
         });
         this.resetIcon()
         this.clearMessage()
@@ -112,6 +118,13 @@ export default {
     resetIcon () {
       this.iconIndex = 0
     },
+    manageTasks () {
+      var count = 0;
+      this.sessions.map((session) => {
+        count += session.tasks.length ;
+      });
+      this.tasks = count;
+    }
   },
 }
 </script>
